@@ -31,6 +31,7 @@
         linear-gradient(#f4ebe6, var(--bg));
       font-family: "Cormorant Garamond", "Georgia", serif;
       color: var(--ink);
+      transition: background 0.5s ease;
     }
 
     /* ========== OUTER FRAME (golden with bevel) ========== */
@@ -166,9 +167,102 @@
       margin:18px auto;
     }
 
+    /* ========== BACKGROUND CONTROLS ========== */
+    .bg-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      border: 1px solid var(--gold-1);
+      max-width: 300px;
+    }
+    
+    .bg-controls h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: var(--ink);
+      font-family: "Cinzel", serif;
+    }
+    
+    .bg-controls label {
+      display: block;
+      margin: 10px 0 5px 0;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    
+    .bg-controls input[type="text"],
+    .bg-controls input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid var(--gold-1);
+      border-radius: 4px;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 14px;
+    }
+    
+    .bg-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .bg-btn {
+      flex: 1;
+      padding: 8px 15px;
+      background: linear-gradient(to bottom, var(--gold-1), var(--gold-2));
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: "Cinzel", serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+    
+    .bg-btn:hover {
+      background: linear-gradient(to bottom, var(--gold-2), #8a6d2a);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    
+    .bg-btn:active {
+      transform: translateY(0);
+    }
+    
+    .bg-btn.reset {
+      background: linear-gradient(to bottom, #c7a867, #a5853e);
+    }
+    
+    .current-bg-info {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(232, 216, 207, 0.3);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+    
+    .current-bg-info strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
     @media (max-width: 520px){
       .panel{ padding:34px 22px }
       .florals{ width:70%; right:-50px }
+      .bg-controls {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
     }
   </style>
 
@@ -178,6 +272,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Great+Vibes&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Background Controls Panel -->
+  <div class="bg-controls">
+    <h3>🎨 Background Changer</h3>
+    
+    <label for="bgName">Background Name:</label>
+    <input type="text" id="bgName" placeholder="Enter a name for this background">
+    
+    <label for="bgImage">Upload Image:</label>
+    <input type="file" id="bgImage" accept="image/*">
+    
+    <div class="bg-buttons">
+      <button class="bg-btn" id="saveBg">Save Background</button>
+      <button class="bg-btn reset" id="resetBg">Reset to Default</button>
+    </div>
+    
+    <div class="current-bg-info" id="currentBgInfo">
+      <strong>Current Background:</strong>
+      <span id="currentBgName">Default Background</span>
+    </div>
+  </div>
+
   <main class="frame">
     <section class="panel" aria-label="Invitation">
       <div class="content">
@@ -204,7 +319,7 @@
 
         <!-- Manual download link -->
         <p class="details" style="margin-top:18px">
-          If the download didn’t start, <a id="manualDownload" href="#" download>download manually</a>.
+          If the download didn't start, <a id="manualDownload" href="#" download>download manually</a>.
         </p>
         <!-- ========= /EDIT ME ========= -->
       </div>
@@ -297,6 +412,153 @@
       const el = document.getElementById(k);
       if (el) el.textContent = v;
     }
+  </script>
+
+  <!-- Background Management Script -->
+  <script>
+    class BackgroundManager {
+      constructor() {
+        this.bgImageInput = document.getElementById('bgImage');
+        this.bgNameInput = document.getElementById('bgName');
+        this.saveBtn = document.getElementById('saveBg');
+        this.resetBtn = document.getElementById('resetBg');
+        this.currentBgName = document.getElementById('currentBgName');
+        this.currentBgInfo = document.getElementById('currentBgInfo');
+        
+        this.init();
+      }
+      
+      init() {
+        // Load saved background on page load
+        this.loadBackground();
+        
+        // Set up event listeners
+        this.saveBtn.addEventListener('click', () => this.saveBackground());
+        this.resetBtn.addEventListener('click', () => this.resetToDefault());
+        
+        // Auto-update background when image is selected
+        this.bgImageInput.addEventListener('change', (e) => {
+          if (e.target.files[0]) {
+            this.applyTemporaryBackground(e.target.files[0]);
+          }
+        });
+      }
+      
+      applyTemporaryBackground(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target.result;
+          this.setBodyBackground(imageUrl, 'Temporary Background');
+          
+          // Auto-fill the name input with the filename (without extension)
+          const fileName = file.name.replace(/\.[^/.]+$/, "");
+          this.bgNameInput.value = fileName || 'My Background';
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      saveBackground() {
+        const file = this.bgImageInput.files[0];
+        if (!file) {
+          alert('Please select an image first!');
+          return;
+        }
+        
+        const bgName = this.bgNameInput.value.trim() || 'My Background';
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageData = e.target.result;
+          
+          // Save to localStorage
+          const bgData = {
+            name: bgName,
+            image: imageData,
+            timestamp: new Date().toISOString()
+          };
+          
+          localStorage.setItem('invitationBackground', JSON.stringify(bgData));
+          
+          // Apply the saved background
+          this.setBodyBackground(imageData, bgName);
+          
+          // Clear the file input
+          this.bgImageInput.value = '';
+          
+          // Show success message
+          alert(`Background "${bgName}" saved successfully!`);
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      loadBackground() {
+        const savedBg = localStorage.getItem('invitationBackground');
+        if (savedBg) {
+          try {
+            const bgData = JSON.parse(savedBg);
+            if (bgData.image) {
+              this.setBodyBackground(bgData.image, bgData.name);
+              return;
+            }
+          } catch (e) {
+            console.error('Error loading saved background:', e);
+          }
+        }
+        
+        // No saved background, use default
+        this.setDefaultBackground();
+      }
+      
+      setBodyBackground(imageUrl, name) {
+        // Apply the background to body
+        document.body.style.backgroundImage = `url('${imageUrl}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundAttachment = 'fixed';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        
+        // Update the display
+        this.currentBgName.textContent = name;
+        this.currentBgInfo.style.display = 'block';
+      }
+      
+      setDefaultBackground() {
+        // Reset to original CSS gradient
+        document.body.style.backgroundImage = '';
+        document.body.style.backgroundSize = '';
+        document.body.style.backgroundPosition = '';
+        document.body.style.backgroundAttachment = '';
+        document.body.style.backgroundRepeat = '';
+        
+        // Apply the original gradient styles
+        document.body.style.background = 
+          'radial-gradient(1200px 800px at 15% -10%, rgba(255,255,255,.6), transparent 55%), ' +
+          'radial-gradient(1000px 700px at 85% 110%, rgba(255,255,255,.35), transparent 60%), ' +
+          'linear-gradient(#f4ebe6, var(--bg))';
+        
+        this.currentBgName.textContent = 'Default Background';
+        this.currentBgInfo.style.display = 'block';
+      }
+      
+      resetToDefault() {
+        // Clear saved background
+        localStorage.removeItem('invitationBackground');
+        
+        // Reset to default
+        this.setDefaultBackground();
+        
+        // Clear inputs
+        this.bgImageInput.value = '';
+        this.bgNameInput.value = '';
+        
+        alert('Background reset to default!');
+      }
+    }
+    
+    // Initialize background manager when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      new BackgroundManager();
+    });
   </script>
 
   <!-- Auto + manual download -->
